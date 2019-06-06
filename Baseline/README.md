@@ -10,11 +10,11 @@ It uses Tensorflow Keras API to build model blocks.
 To see references(Papers, original code), please check below resources.  
 Any suggestions or corrections are welcome.  
   
-<img src="./images/graphs.png" width="850px" align="center"/>  
+<img src="./README_images/graphs.png" width="850px" align="center"/>  
 
 ### Abnormality module for anomaly detection
 
-<img src="./images/abnormality_module.png" width="600px" align="center"/>  
+<img src="./README_images/abnormality_module.png" width="600px" align="center"/>  
 
 The paper suggests utilizing Anomality module to enhance overall performance.
 
