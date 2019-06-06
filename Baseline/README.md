@@ -1,3 +1,10 @@
+### Usage
+```bash
+pip3 install -r requirements.txt # OR conda install -r requirements.txt
+
+python3 mnist_softmax.py # Pure softmax detector
+```
+
 ## Overview
 
 This repository contains reproduced vision experiments in paper  
@@ -19,11 +26,6 @@ The paper suggests utilizing Anomality module to enhance overall performance.
 ### Version range, Dependencies
 
 
-### Usage
-```bash
-pip3 install -r requirements.txt # OR conda install -r requirements.txt
-python3 mnist_softmax.py # Pure softmax detector
-```
 ### Resources:
 
 -   [https://arxiv.org/abs/1610.02136](https://arxiv.org/abs/1610.02136)
