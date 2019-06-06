@@ -1,11 +1,9 @@
 ## Overview
 
-It is known that neural network cannot discriminate anomaly data(e.g. when putting alphabets to MNIST classifier) reliably only with their softmax output scores.
-
 This repository contains reproduced vision experiments in paper  
 [_'A Baseline for Detecting Misclassified and Out-of-Distribution Examples in Neural Networks'_](https://arxiv.org/abs/1610.02136),  
-(by Hendrycks et al.), which discusses about the topic intensely.  
-It uses Tensorflow Keras API to build model blocks.
+(by Hendrycks et al.), which discusses about the OOD topic intensely.  
+It uses **Tensorflow Keras API** to build model blocks.
 
 To see references(Papers, original code), please check below resources.  
 Any suggestions or corrections are welcome.  
@@ -20,25 +18,12 @@ The paper suggests utilizing Anomality module to enhance overall performance.
 
 ### Version range, Dependencies
 
--   python>=3.4
--   tensorflow>=1.8
--   numpy
--   scikit-learn
--   h5py (for saving/loading Keras model)
--   jupyter, matplotlib (optional, for visualization)
 
 ### Usage
-
 ```bash
+pip3 install -r requirements.txt # OR conda install -r requirements.txt
 python3 mnist_softmax.py # Pure softmax detector
-python3 mnist_abnormality_module.py # Anomaly detector with auxiliary decoder
 ```
-
-### Todo:
-
--   Apply moving average to trained parameters, using tf.train.ExponentialMovingAverage()
--   Gelu Nonlinearity
-
 ### Resources:
 
 -   [https://arxiv.org/abs/1610.02136](https://arxiv.org/abs/1610.02136)
