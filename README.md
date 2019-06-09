@@ -10,7 +10,9 @@
 ## List of contents
 - OOD PAPER1 ([Paper]() / [Code]())
 - OOD PAPER2 ([Paper]() / [Code]())
-- A baseline for detecting misclassified and out-of-distribution examples in neural networks, Hendrycks et al. 
+- A baseline for detecting misclassified and out-of-distribution examples in neural networks, Hendrycks et al.
 ([Paper](https://arxiv.org/abs/1610.02136) / [Code](https://github.com/EpiSci/M-OOD/tree/master/Baseline))
+- Prediction under uncertainty with error encoding network, Mikael Henaff et al.
+([Paper](https://arxiv.org/pdf/1711.04994.pdf) / [Code](https://github.com/EpiSci/M-OOD/tree/master/EEN))
 
 

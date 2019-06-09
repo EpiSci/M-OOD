@@ -4,7 +4,6 @@
 Apr. 2019 by wontak ryu.
 ryu071511@gmail.com.
 https://github.com/RRoundTable/EEN-with-Keras.
-
 Building keras model.
 '''
 from tensorflow.python.keras.layers import Conv2D, BatchNormalization, ReLU,Conv2DTranspose, Dense, ZeroPadding2D, Lambda, Input
@@ -13,7 +12,6 @@ from tensorflow.python.keras import layers
 from tensorflow.python.keras import backend as K
 import argparse
 import tensorflow as tf
-import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-task', type=str, default='poke', help='breakout | seaquest | flappy | poke | driving')
@@ -39,10 +37,6 @@ opt = parser.parse_args()
 K.set_image_data_format("channels_first")
 print("imgae data format : ",K.image_data_format())
 
-"""
-Convolution : (W-F+2P)/S+1
-DeConvolution : S*(W-1)+F-P
-"""
 def g_network_encoder(opt):
     """Deterministic encoder
     :param opt: parser
@@ -180,22 +174,6 @@ def encoder_latent(opt):
     model.add(Dense(opt.nfeature))
     return model
 
-# Deterministic Model
-class DeterministicModel:
-    def __init__(self, opt):
-        self.opt = opt
-        self.g_network_encoder = g_network_encoder(self.opt)
-        self.g_network_decoder = g_network_decoder(self.opt)
-
-    def build(self):
-        inputs = Input((self.opt.nc, self.opt.height, self.opt.width))
-        outputs = self.g_network_decoder(self.g_network_encoder(inputs))
-        model = Model(inputs, outputs)
-        return model
-
-    def get_layer(self):
-        return [self.g_network_encoder, self.g_network_decoder]
-
 class MultiInputLayer(layers.Layer):
     """
     Custom layer
@@ -248,9 +226,6 @@ class LatentResidualModel3Layer:
     Our Model : Error-Encoding-Network
     """
     def __init__(self, opt) -> None:
-        """
-        :param opt: parser
-        """
         self.opt = opt
         self.g_network_encoder = g_network_encoder(self.opt)
         self.g_network_decoder = g_network_decoder(self.opt)
@@ -271,86 +246,3 @@ class LatentResidualModel3Layer:
         pred_f = self.f_network_decoder(h)
         model_f = Model([inputs_,targets_], pred_f)
         return model_f
-
-    def get_model_z(self):
-        """
-        return latent variable model
-        :return: keras Model
-        """
-        inputs = Input((self.opt.nc, self.opt.height, self.opt.width))
-        targets =Input((self.opt.nc, self.opt.height, self.opt.width))
-        z_emb = Lambda(self.get_latent)([inputs, targets])
-        return Model([inputs, targets], z_emb)
-
-    def get_latent(self, x):
-        """
-        :param x: [inputs, targets]
-         - inputs : numpy array
-         - targets : numpy array
-        :return: latent variable
-        """
-        inputs = x[0]
-        targets = x[1]
-        pred_g = self.g_network_decoder(self.g_network_encoder(inputs))
-        # residual
-        r = Lambda((lambda x: x[0] - x[1]))([targets, pred_g])
-        out_dim = K.int_shape(self.phi_network_conv(r))  # shape=(?, 64, 7, 7)
-        z = self.phi_network_fc(K.reshape(self.phi_network_conv(r),
-                                          (self.opt.batch_size, out_dim[1] * out_dim[2] * out_dim[3])))
-        z = K.reshape(z, (self.opt.batch_size, self.opt.n_latent))
-        return z
-
-    def decode(self, inputs, z):
-        """
-        :param inputs: numpy_array(images)
-        :param z: latent variable
-        :return: prediction with latent variable
-        """
-        inputs = K.reshape(inputs, (self.opt.batch_size,
-                                    self.opt.ncond * self.opt.nc,
-                                    self.opt.height,
-                                    self.opt.width))
-        z = tf.convert_to_tensor(z)
-        z_emb = self.encoder_latent(z)
-        z_emb =  K.reshape(z_emb, (self.opt.batch_size, self.opt.nfeature,1, 1))
-        s = self.f_network_encoder(inputs)
-        h = Lambda((lambda x: tf.math.add(x[0], x[1])))([s, z_emb])
-        pred = self.f_network_decoder(h)
-        return K.eval(pred)
-
-    def get_layers(self):
-        layers = [self.g_network_encoder, self.g_network_decoder, self.f_network_encoder,
-                  self.phi_network_conv, self.phi_network_fc, self.encoder_latent, self.f_network_decoder]
-        return layers
-
-    def load_weights(self, model):
-        """Update layers
-        :param model: trained model
-        """
-        transfer_layer = model.layers[2].get_layers()
-        transfer_layer.append(model.layers[3])
-        self.g_network_encoder = transfer_layer[0]
-        self.g_network_decoder = transfer_layer[1]
-        self.f_network_encoder = transfer_layer[2]
-        self.phi_network_conv = transfer_layer[3]
-        self.phi_network_fc = transfer_layer[4]
-        self.encoder_latent = transfer_layer[5]
-        self.f_network_decoder = transfer_layer[6]
-
-class BaselineModel3Layer:
-    def __init__(self, opt):
-        self.opt = opt
-        self.f_network_encoder = f_network_encoder(self.opt)
-        self.f_network_decoder = f_network_decoder(self.opt)
-
-    def build(self):
-        inputs = Input((self.opt.nc, self.opt.height, self.opt.width))
-        h = self.f_network_encoder(inputs)
-        pred = self.f_network_decoder(h)
-        return Model(inputs, pred)
-
-if __name__ == '__main__':
-    EEN = LatentResidualModel3Layer(opt)
-    model = EEN.build()
-    EEN.get_model_z()
-    model.compile(optimizer = "Adam", loss = "mse")
